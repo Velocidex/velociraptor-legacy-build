@@ -4,18 +4,18 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"fmt"
-	"os"
 	"io"
 	"io/ioutil"
-	"strings"
 	"net/http"
-	"archive/tar"
-	"compress/gzip"	
-	
+	"os"
 	"path/filepath"
-	"github.com/magefile/mage/sh"
+	"strings"
+
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/magefile/mage/sh"
 )
 
 type mutation struct {
@@ -23,9 +23,8 @@ type mutation struct {
 	From, To string
 
 	// Go Replace by regex
-	Match, Replace, Glob string	
+	Match, Replace, Glob string
 }
-
 
 var (
 	deps = []string{
@@ -37,7 +36,7 @@ var (
 	}
 
 	golang_url = "https://go.dev/dl/go1.20.14.linux-amd64.tar.gz"
-	mutations = []mutation{
+	mutations  = []mutation{
 		{From: "../patches/go.mod", To: "velociraptor/go.mod"},
 		{From: "../patches/go.sum", To: "velociraptor/go.sum"},
 		{From: "../patches/compat.go", To: "velociraptor/utils/compat.go"},
@@ -53,13 +52,12 @@ func installGo() error {
 	if err == nil && stat.Mode().IsDir() {
 		return nil
 	}
-	
+
 	resp, err := http.Get(golang_url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-
 
 	gzr, err := gzip.NewReader(resp.Body)
 	if err != nil {
@@ -70,11 +68,11 @@ func installGo() error {
 	tr := tar.NewReader(gzr)
 	for {
 		header, err := tr.Next()
-		
+
 		switch {
 		case err == io.EOF:
 			return nil
-			
+
 		case err != nil:
 			return err
 
@@ -83,17 +81,17 @@ func installGo() error {
 		}
 
 		target := filepath.Join(dst, header.Name)
-		
+
 		// check the file type
 		switch header.Typeflag {
 
-			// if its a dir and it doesn't exist create it
+		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
 			err := os.MkdirAll(target, 0755)
 			if err != nil {
 				return err
 			}
-			
+
 		case tar.TypeReg:
 			fmt.Printf("Creating %v (%v bytes)\n", target, header.Size)
 			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
@@ -111,9 +109,9 @@ func installGo() error {
 			err = os.Chmod(target, os.FileMode(header.Mode))
 			if err != nil {
 				return err
-			}			
+			}
 		}
-	}	
+	}
 }
 
 func replace_string_in_file(filename string, old string, new string) error {
@@ -153,11 +151,10 @@ func copyOutput() error {
 		err := sh.Copy(dst, filename)
 		if err != nil {
 			return err
-		}			
+		}
 	}
 	return nil
 }
-
 
 func Build() error {
 	err := os.MkdirAll("build", 0700)
@@ -180,7 +177,7 @@ func Build() error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, dep := range deps {
 		err = maybeClone(dep)
 		if err != nil {
@@ -194,7 +191,7 @@ func Build() error {
 			err := sh.Copy(m.To, m.From)
 			if err != nil {
 				return err
-			}			
+			}
 		}
 
 		if m.Glob != "" {
@@ -211,10 +208,10 @@ func Build() error {
 				err = replace_string_in_file(filename, m.Match, m.Replace)
 				if err != nil {
 					return err
-				}				
+				}
 			}
 		}
-		
+
 	}
 
 	// Build steps
@@ -227,24 +224,23 @@ func Build() error {
 	env["PATH"] = "../go/go/bin/:" + os.Getenv("PATH")
 	env["GOPATH"] = ""
 
-	
 	go_path, err := filepath.Abs("../go/go/bin/go")
 	if err != nil {
 		return err
 	}
 	env["MAGEFILE_GOCMD"] = go_path
 	env["MAGEFILE_VERBOSE"] = "1"
-	
+
 	err = sh.RunWithV(env, go_path, "version")
 	if err != nil {
 		return err
 	}
-	
+
 	err = sh.RunWithV(env, go_path, "run", "-v", "./make.go", "windows")
 	if err != nil {
 		return err
 	}
-	
+
 	err = sh.RunWithV(env, go_path, "run", "-v", "./make.go", "windowsx86")
 	if err != nil {
 		return err
@@ -254,6 +250,6 @@ func Build() error {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
