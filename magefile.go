@@ -24,6 +24,8 @@ type mutation struct {
 
 	// Go Replace by regex
 	Match, Replace, Glob string
+
+	DeleteGlob string
 }
 
 var (
@@ -39,6 +41,11 @@ var (
 	mutations  = []mutation{
 		{From: "../patches/go.mod", To: "velociraptor/go.mod"},
 		{From: "../patches/go.sum", To: "velociraptor/go.sum"},
+		{DeleteGlob: "velociraptor/tools/survey/*.go"},
+		{Glob: "velociraptor/vql/psutils/*.go",
+			Match:   "github.com/shirou/gopsutil/v4",
+			Replace: "github.com/shirou/gopsutil/v3"},
+		{From: "../patches/survey.go", To: "velociraptor/tools/survey/survey.go"},
 		{From: "../patches/compat.go", To: "velociraptor/utils/compat.go"},
 		{Glob: "*/go.mod", Match: "go 1.2", Replace: "// "},
 		{Glob: "WinPmem/go-winpmem/go.mod", Match: "go 1.2", Replace: "// go 1.2"},
@@ -188,9 +195,30 @@ func Build() error {
 	for _, m := range mutations {
 		if m.From != "" {
 			fmt.Printf("Copying %v to %v\n", m.From, m.To)
+			basedir := filepath.Dir(m.To)
+			os.MkdirAll(basedir, 0755)
+
 			err := sh.Copy(m.To, m.From)
 			if err != nil {
 				return err
+			}
+		}
+
+		if m.DeleteGlob != "" {
+			basepath, pattern := doublestar.SplitPattern(m.DeleteGlob)
+			fsys := os.DirFS(basepath)
+			matches, err := doublestar.Glob(fsys, pattern)
+			if err != nil {
+				return err
+			}
+
+			for _, match := range matches {
+				filename := filepath.Join(basepath, match)
+				fmt.Printf("Deleting %v in %v\n", m.Match, filename)
+				err = os.Remove(filename)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
