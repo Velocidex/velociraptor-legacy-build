@@ -28,13 +28,21 @@ type mutation struct {
 	DeleteGlob string
 }
 
+type DependencyGithub struct {
+	Repo   string
+	Branch string
+}
+
 var (
-	deps = []string{
-		"https://github.com/Velocidex/WinPmem",
-		"https://github.com/Velocidex/go-vhdx",
-		"https://github.com/Velocidex/go-vmdk",
-		"https://github.com/Velocidex/go-journalctl",
-		"https://github.com/Velocidex/velociraptor",
+	deps = []DependencyGithub{
+		{Repo: "https://github.com/Velocidex/WinPmem"},
+		{Repo: "https://github.com/Velocidex/go-vhdx"},
+		{Repo: "https://github.com/Velocidex/go-vmdk"},
+		{Repo: "https://github.com/Velocidex/go-journalctl"},
+		{
+			Repo:   "https://github.com/Velocidex/velociraptor",
+			Branch: "v0.74-release",
+		},
 	}
 
 	golang_url = "https://go.dev/dl/go1.20.14.linux-amd64.tar.gz"
@@ -133,14 +141,20 @@ func replace_string_in_file(filename string, old string, new string) error {
 	return ioutil.WriteFile(filename, []byte(newContents), 0644)
 }
 
-func maybeClone(dep string) error {
-	base := filepath.Base(dep)
+func maybeClone(dep DependencyGithub) error {
+	base := filepath.Base(dep.Repo)
 	_, err := os.Lstat(base)
 	if err == nil {
 		return nil
 	}
 
-	return sh.RunV("git", "clone", "--depth", "1", dep)
+	branch := "master"
+	if dep.Branch != "" {
+		branch = dep.Branch
+	}
+
+	return sh.RunV("git", "clone", "--depth", "1",
+		"--single-branch", "-b", branch, dep.Repo)
 }
 
 func copyOutput() error {
