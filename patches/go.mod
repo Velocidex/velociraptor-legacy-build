@@ -111,7 +111,7 @@ require (
 	github.com/Velocidex/go-vhdx v0.0.0-20240601014259-b204818c95fd
 	github.com/Velocidex/go-vmdk v0.0.0-20241202015615-d508d852d5e1
 	github.com/Velocidex/grok v0.0.1
-	github.com/Velocidex/ordereddict v0.0.0-20230909174157-2aa49cc5d11d
+	github.com/Velocidex/ordereddict v0.0.0-20250821063524-02dc06e46238
 	github.com/Velocidex/sigma-go v0.0.0-20241113062227-c1c5ea4b5250
 	github.com/VirusTotal/gyp v0.9.1-0.20231202132633-bb35dbf177a6
 	github.com/alecthomas/kingpin/v2 v2.4.0
@@ -153,7 +153,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.2.0
-	www.velocidex.com/golang/vtypes v0.0.0-20240123105603-069d4a7f435c
+	www.velocidex.com/golang/vtypes v0.0.0-20250802153006-821cec8fd392
 )
 
 require (
@@ -263,15 +263,11 @@ require (
 )
 
 // replace github.com/Velocidex/grok => /home/mic/projects/grok
-// replace www.velocidex.com/golang/vfilter => /home/mic/projects/vfilter
 // replace www.velocidex.com/golang/regparser => /home/mic/projects/regparser
 // replace www.velocidex.com/golang/go-ntfs => /home/mic/projects/go-ntfs
 // replace github.com/Velocidex/go-fat => /home/mic/projects/go-fat
 // replace www.velocidex.com/golang/go-pe => /home/mic/projects/go-pe
-// replace www.velocidex.com/golang/evtx => ../evtx
-
 // replace www.velocidex.com/golang/go-ese => /home/mic/projects/go-ese
-// replace github.com/Velocidex/ordereddict => /home/mic/projects/ordereddict
 // replace github.com/Velocidex/yaml/v2 => /home/mic/projects/yaml
 // replace www.velocidex.com/golang/go-prefetch => /home/mic/projects/go-prefetch
 // replace github.com/Velocidex/go-magic => /home/mic/projects/go-magic
@@ -283,19 +279,23 @@ require (
 // replace github.com/Velocidex/zip => /home/mic/projects/zip
 // replace github.com/Velocidex/sflags => /home/mic/projects/sflags
 // replace github.com/Velocidex/etw => ../etw
-// replace github.com/Velocidex/go-ewf => ../go-ewf
+
 // replace github.com/Velocidex/grpc-go-pool => /home/mic/projects/grpc-go-pool
-// replace www.velocidex.com/golang/oleparse => /home/matt/git/oleparse
 // replace github.com/go-errors/errors => /home/mic/projects/errors
 // replace github.com/Velocidex/ttlcache/v2 => /home/mic/projects/ttlcache
 replace github.com/Velocidex/WinPmem/go-winpmem => ../WinPmem/go-winpmem
-
-replace github.com/Velocidex/go-vhdx => ../go-vhdx
-
-replace github.com/Velocidex/go-vmdk => ../go-vmdk
-
 replace github.com/Velocidex/go-journalctl => ../go-journalctl
-
+replace github.com/Velocidex/go-ewf => ../go-ewf
+replace github.com/Velocidex/go-fat => ../go-fat
+replace github.com/Velocidex/go-vhdx => ../go-vhdx
+replace github.com/Velocidex/go-vmdk => ../go-vmdk
+replace github.com/Velocidex/go-yara => ../go-yara
+replace github.com/Velocidex/ordereddict => ../ordereddict
+replace www.velocidex.com/golang/evtx => ../evtx
+replace www.velocidex.com/golang/go-ese => ../go-ese
+replace www.velocidex.com/golang/oleparse => ../oleparse
+replace www.velocidex.com/golang/vfilter => ../vfilter
+replace www.velocidex.com/golang/vtypes => ../vtypes
 // Remove search for html end block. This allows inserting unbalanced
 // HTML tags into the markdown
 replace github.com/russross/blackfriday/v2 => github.com/Velocidex/blackfriday/v2 v2.0.2-0.20200811050547-4f26a09e2b3b
