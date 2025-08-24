@@ -36,12 +36,23 @@ type DependencyGithub struct {
 var (
 	deps = []DependencyGithub{
 		{Repo: "https://github.com/Velocidex/WinPmem"},
+		{Repo: "https://github.com/Velocidex/evtx"},
+		{Repo: "https://github.com/Velocidex/go-ese"},
+		{Repo: "https://github.com/Velocidex/go-ewf"},
+		{Repo: "https://github.com/Velocidex/go-ext4"},
+		{Repo: "https://github.com/Velocidex/go-fat"},
+		{Repo: "https://github.com/Velocidex/go-journalctl"},
+		{Repo: "https://github.com/Velocidex/go-mscfb"},
 		{Repo: "https://github.com/Velocidex/go-vhdx"},
 		{Repo: "https://github.com/Velocidex/go-vmdk"},
-		{Repo: "https://github.com/Velocidex/go-journalctl"},
+		{Repo: "https://github.com/Velocidex/go-yara"},
+		{Repo: "https://github.com/Velocidex/oleparse"},
+		{Repo: "https://github.com/Velocidex/ordereddict"},
+		{Repo: "https://github.com/Velocidex/vfilter"},
+		{Repo: "https://github.com/Velocidex/vtypes"},
 		{
 			Repo:   "https://github.com/Velocidex/velociraptor",
-			Branch: "v0.74-release",
+			Branch: "master",
 		},
 	}
 
@@ -50,6 +61,7 @@ var (
 		{From: "../patches/go.mod", To: "velociraptor/go.mod"},
 		{From: "../patches/go.sum", To: "velociraptor/go.sum"},
 		{DeleteGlob: "velociraptor/tools/survey/*.go"},
+		{DeleteGlob: "velociraptor/bin/golden.go"},
 		{Glob: "velociraptor/vql/psutils/*.go",
 			Match:   "github.com/shirou/gopsutil/v4",
 			Replace: "github.com/shirou/gopsutil/v3"},
@@ -60,6 +72,10 @@ var (
 		{From: "../patches/compat.go", To: "velociraptor/utils/compat.go"},
 		{Glob: "*/go.mod", Match: "go 1.2", Replace: "// "},
 		{Glob: "WinPmem/go-winpmem/go.mod", Match: "go 1.2", Replace: "// go 1.2"},
+
+		// Pin go-ese dependencies.
+		{From: "../patches/go-ese/go.mod", To: "go-ese/go.mod"},
+		{From: "../patches/go-ese/go.sum", To: "go-ese/go.sum"},
 	}
 )
 
@@ -280,6 +296,15 @@ func Build() error {
 	if err != nil {
 		return err
 	}
+
+	// go mod tidy will break the build since it will force upgrading
+	// some dependencies.
+	/*
+		err = sh.RunWithV(env, go_path, "mod", "tidy")
+		if err != nil {
+			return err
+		}
+	*/
 
 	err = sh.RunWithV(env, go_path, "run", "-v", "./make.go", "windows")
 	if err != nil {
