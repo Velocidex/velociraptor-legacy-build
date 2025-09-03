@@ -3,3 +3,4 @@ all:
 
 clean:
 	rm -rf ./build/
+	rm -f output/*.exe
