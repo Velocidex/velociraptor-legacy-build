@@ -52,7 +52,7 @@ var (
 		{Repo: "https://github.com/Velocidex/vtypes"},
 		{
 			Repo:   "https://github.com/Velocidex/velociraptor",
-			Branch: "master",
+			Branch: "v0.75-release",
 		},
 	}
 
