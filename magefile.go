@@ -62,6 +62,7 @@ var (
 		{From: "../patches/go.sum", To: "velociraptor/go.sum"},
 		{DeleteGlob: "velociraptor/tools/survey/*.go"},
 		{DeleteGlob: "velociraptor/bin/golden.go"},
+		{DeleteGlob: "velociraptor/vql/common/yarax.go"},
 		{Glob: "velociraptor/vql/psutils/*.go",
 			Match:   "github.com/shirou/gopsutil/v4",
 			Replace: "github.com/shirou/gopsutil/v3"},
