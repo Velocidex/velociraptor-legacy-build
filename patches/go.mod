@@ -278,23 +278,26 @@ require (
 // replace github.com/Velocidex/ttlcache/v2 => /home/mic/projects/ttlcache
 // replace github.com/Velocidex/zip => /home/mic/projects/zip
 // replace github.com/Velocidex/sflags => /home/mic/projects/sflags
-// replace github.com/Velocidex/etw => ../etw
-
 // replace github.com/Velocidex/grpc-go-pool => /home/mic/projects/grpc-go-pool
 // replace github.com/go-errors/errors => /home/mic/projects/errors
 // replace github.com/Velocidex/ttlcache/v2 => /home/mic/projects/ttlcache
+
+replace github.com/Velocidex/etw => ../etw
+replace www.velocidex.com/golang/go-ntfs => ../go-ntfs
 replace github.com/Velocidex/WinPmem/go-winpmem => ../WinPmem/go-winpmem
 replace github.com/Velocidex/go-journalctl => ../go-journalctl
 replace github.com/Velocidex/go-ewf => ../go-ewf
 replace github.com/Velocidex/go-fat => ../go-fat
 replace github.com/Velocidex/go-vhdx => ../go-vhdx
 replace github.com/Velocidex/go-vmdk => ../go-vmdk
+replace github.com/Velocidex/zip => ../zip
 replace github.com/Velocidex/go-yara => ../go-yara
 replace github.com/Velocidex/ordereddict => ../ordereddict
 replace www.velocidex.com/golang/evtx => ../evtx
 replace www.velocidex.com/golang/go-ese => ../go-ese
 replace www.velocidex.com/golang/oleparse => ../oleparse
 replace www.velocidex.com/golang/vfilter => ../vfilter
+replace www.velocidex.com/golang/go-pe => ../go-pe
 replace www.velocidex.com/golang/vtypes => ../vtypes
 // Remove search for html end block. This allows inserting unbalanced
 // HTML tags into the markdown
