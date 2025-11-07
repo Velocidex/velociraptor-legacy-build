@@ -40,15 +40,19 @@ var (
 		{Repo: "https://github.com/Velocidex/go-ese"},
 		{Repo: "https://github.com/Velocidex/go-ewf"},
 		{Repo: "https://github.com/Velocidex/go-ext4"},
+		{Repo: "https://github.com/Velocidex/etw"},
 		{Repo: "https://github.com/Velocidex/go-fat"},
 		{Repo: "https://github.com/Velocidex/go-journalctl"},
+		{Repo: "https://github.com/Velocidex/zip"},
 		{Repo: "https://github.com/Velocidex/go-mscfb"},
 		{Repo: "https://github.com/Velocidex/go-vhdx"},
+		{Repo: "https://github.com/Velocidex/go-pe"},
 		{Repo: "https://github.com/Velocidex/go-vmdk"},
 		{Repo: "https://github.com/Velocidex/go-yara"},
 		{Repo: "https://github.com/Velocidex/oleparse"},
 		{Repo: "https://github.com/Velocidex/ordereddict"},
 		{Repo: "https://github.com/Velocidex/vfilter"},
+		{Repo: "https://github.com/Velocidex/go-ntfs"},
 		{Repo: "https://github.com/Velocidex/vtypes"},
 		{
 			Repo:   "https://github.com/Velocidex/velociraptor",
@@ -56,10 +60,22 @@ var (
 		},
 	}
 
+	// The Version of Go to use that still works on legacy systems.
 	golang_url = "https://go.dev/dl/go1.20.14.linux-amd64.tar.gz"
-	mutations  = []mutation{
+
+	// Transform the codebase so it can build
+	mutations = []mutation{
 		{From: "../patches/go.mod", To: "velociraptor/go.mod"},
 		{From: "../patches/go.sum", To: "velociraptor/go.sum"},
+		{From: "../patches/etw/go.mod", To: "etw/go.mod"},
+		{From: "../patches/etw/go.sum", To: "etw/go.sum"},
+
+		{From: "../patches/evtx/go.mod", To: "evtx/go.mod"},
+		{From: "../patches/evtx/go.sum", To: "evtx/go.sum"},
+
+		{From: "../patches/go-pe/go.mod", To: "go-pe/go.mod"},
+		{From: "../patches/go-pe/go.sum", To: "go-pe/go.sum"},
+
 		{DeleteGlob: "velociraptor/tools/survey/*.go"},
 		{DeleteGlob: "velociraptor/bin/golden.go"},
 		{DeleteGlob: "velociraptor/vql/common/yarax.go"},
@@ -71,6 +87,7 @@ var (
 			Replace: "_ = windows.SetDefaultDllDirectories"},
 		{From: "../patches/survey.go", To: "velociraptor/tools/survey/survey.go"},
 		{From: "../patches/compat.go", To: "velociraptor/utils/compat.go"},
+		{From: "../patches/json/validator.go", To: "velociraptor/tools/json/validator.go"},
 		{Glob: "*/go.mod", Match: "go 1.2", Replace: "// "},
 		{Glob: "WinPmem/go-winpmem/go.mod", Match: "go 1.2", Replace: "// go 1.2"},
 
