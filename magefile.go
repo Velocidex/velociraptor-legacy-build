@@ -54,9 +54,12 @@ var (
 		{Repo: "https://github.com/Velocidex/vfilter"},
 		{Repo: "https://github.com/Velocidex/go-ntfs"},
 		{Repo: "https://github.com/Velocidex/vtypes"},
+		{Repo: "https://github.com/Velocidex/disklru"},
+		{Repo: "https://github.com/Velocidex/ttlcache"},
+		{Repo: "https://github.com/sebdah/goldie"},
 		{
 			Repo:   "https://github.com/Velocidex/velociraptor",
-			Branch: "v0.75-release",
+			Branch: "v0.76-release",
 		},
 	}
 
@@ -73,11 +76,38 @@ var (
 		{From: "../patches/evtx/go.mod", To: "evtx/go.mod"},
 		{From: "../patches/evtx/go.sum", To: "evtx/go.sum"},
 
+		{From: "../patches/go-fat/go.mod", To: "go-fat/go.mod"},
+		{From: "../patches/go-fat/go.sum", To: "go-fat/go.sum"},
+
 		{From: "../patches/go-pe/go.mod", To: "go-pe/go.mod"},
 		{From: "../patches/go-pe/go.sum", To: "go-pe/go.sum"},
 
+		{From: "../patches/disklru/go.mod", To: "disklru/go.mod"},
+		{From: "../patches/disklru/go.sum", To: "disklru/go.sum"},
+
+		{From: "../patches/go-ewf/go.mod", To: "go-ewf/go.mod"},
+		{From: "../patches/go-ewf/go.sum", To: "go-ewf/go.sum"},
+
+		{DeleteGlob: "ttlcache/*_test.go"},
+		{From: "../patches/ttlcache/go.mod", To: "ttlcache/go.mod"},
+		{From: "../patches/ttlcache/go.sum", To: "ttlcache/go.sum"},
+
 		{DeleteGlob: "velociraptor/tools/survey/*.go"},
-		{DeleteGlob: "velociraptor/bin/golden.go"},
+		{DeleteGlob: "velociraptor/services/docs/*.go"},
+		{From: "../patches/velociraptor/docs_manager.go",
+			To: "velociraptor/services/docs/docs_manager.go"},
+
+		{DeleteGlob: "velociraptor/accessors/ssh/*.go"},
+		{From: "../patches/velociraptor/accessors/ssh.go",
+			To: "velociraptor/accessors/ssh/ssh.go"},
+
+		// Remove plugins which are hard to maintain going forward
+		{DeleteGlob: "velociraptor/vql/tools/{gcs_upload.go,sftp_upload.go}"},
+		{DeleteGlob: "velociraptor/vql/linux/ebpf/*.go"},
+		{From: "../patches/velociraptor/ebpf.go",
+			To: "velociraptor/vql/linux/ebpf/ebpf.go"},
+
+		{DeleteGlob: "velociraptor/bin/{golden,users,grant}.go"},
 		{DeleteGlob: "velociraptor/vql/common/yarax.go"},
 		{Glob: "velociraptor/vql/psutils/*.go",
 			Match:   "github.com/shirou/gopsutil/v4",
