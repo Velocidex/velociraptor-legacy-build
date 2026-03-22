@@ -60,6 +60,7 @@ var (
 		{
 			Repo:   "https://github.com/Velocidex/velociraptor",
 			Branch: "v0.76-release",
+			// Branch: "master",
 		},
 	}
 
@@ -100,10 +101,18 @@ var (
 		{DeleteGlob: "velociraptor/accessors/ssh/*.go"},
 		{From: "../patches/velociraptor/accessors/ssh.go",
 			To: "velociraptor/accessors/ssh/ssh.go"},
+		{DeleteGlob: "velociraptor/accessors/s3/*.go"},
+		{From: "../patches/velociraptor/accessors/s3.go",
+			To: "velociraptor/accessors/s3/s3.go"},
 
 		// Remove plugins which are hard to maintain going forward
-		{DeleteGlob: "velociraptor/vql/tools/{gcs_upload.go,sftp_upload.go}"},
+		{DeleteGlob: "velociraptor/vql/tools/{gcs_upload.go,sftp_upload.go,s3_upload_minio.go}"},
 		{DeleteGlob: "velociraptor/vql/linux/ebpf/*.go"},
+		{DeleteGlob: "velociraptor/vql/server/elastic.go"},
+		{DeleteGlob: "velociraptor/vql/tools/index/*.go"},
+		{From: "../patches/velociraptor/vql/tools/index/index.go",
+			To: "velociraptor/vql/tools/index/index.go"},
+
 		{From: "../patches/velociraptor/ebpf.go",
 			To: "velociraptor/vql/linux/ebpf/ebpf.go"},
 
