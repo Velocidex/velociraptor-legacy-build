@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -23,7 +24,7 @@ type mutation struct {
 	From, To string
 
 	// Go Replace by regex
-	Match, Replace, Glob string
+	Match, MatchRE, Replace, Glob string
 
 	DeleteGlob string
 }
@@ -31,6 +32,8 @@ type mutation struct {
 type DependencyGithub struct {
 	Repo   string
 	Branch string
+	Commit string
+	Depth  string
 }
 
 var (
@@ -42,7 +45,6 @@ var (
 		{Repo: "https://github.com/Velocidex/go-ext4"},
 		{Repo: "https://github.com/Velocidex/etw"},
 		{Repo: "https://github.com/Velocidex/go-fat"},
-		{Repo: "https://github.com/Velocidex/go-journalctl"},
 		{Repo: "https://github.com/Velocidex/zip"},
 		{Repo: "https://github.com/Velocidex/go-mscfb"},
 		{Repo: "https://github.com/Velocidex/go-vhdx"},
@@ -59,8 +61,8 @@ var (
 		{Repo: "https://github.com/sebdah/goldie"},
 		{
 			Repo:   "https://github.com/Velocidex/velociraptor",
-			Branch: "v0.76-release",
-			// Branch: "master",
+			Branch: "v0.77-release",
+			//Branch: "master",
 		},
 	}
 
@@ -73,6 +75,8 @@ var (
 		{From: "../patches/go.sum", To: "velociraptor/go.sum"},
 		{From: "../patches/etw/go.mod", To: "etw/go.mod"},
 		{From: "../patches/etw/go.sum", To: "etw/go.sum"},
+		{From: "../patches/vfilter/go.mod", To: "vfilter/go.mod"},
+		{From: "../patches/vfilter/go.sum", To: "vfilter/go.sum"},
 
 		{From: "../patches/evtx/go.mod", To: "evtx/go.mod"},
 		{From: "../patches/evtx/go.sum", To: "evtx/go.sum"},
@@ -110,6 +114,11 @@ var (
 		{DeleteGlob: "velociraptor/vql/linux/ebpf/*.go"},
 		{DeleteGlob: "velociraptor/vql/server/elastic.go"},
 		{DeleteGlob: "velociraptor/vql/tools/index/*.go"},
+		{DeleteGlob: "velociraptor/vql/parsers/journald/*.go"},
+
+		{From: "../patches/velociraptor/vql/parsers/journald/doc.go",
+			To: "velociraptor/vql/parsers/journald/doc.go"},
+
 		{From: "../patches/velociraptor/vql/tools/index/index.go",
 			To: "velociraptor/vql/tools/index/index.go"},
 
@@ -124,6 +133,21 @@ var (
 		{Glob: "velociraptor/bin/installer_windows.go",
 			Match:   "windows.SetDefaultDllDirectories(windows.LOAD_LIBRARY_SEARCH_SYSTEM32)",
 			Replace: "_ = windows.SetDefaultDllDirectories"},
+
+		// Downconvert newer protobuf generated files to older
+		// constructs.
+		{Glob: "velociraptor/**/*.pb.go",
+			MatchRE: `(?i)unsafe.Slice\(unsafe.StringData\(([_a-z]+)\), len\([_a-z]+\)\)`,
+			Replace: "[]byte($1)"},
+
+		{Glob: "velociraptor/**/*.pb.go",
+			MatchRE: `unsafe "unsafe"`,
+			Replace: ""},
+
+		{Glob: "velociraptor/**/*.pb.go",
+			MatchRE: `(?i)const ([_a-z]+_rawDesc) =`,
+			Replace: "var $1 ="},
+
 		{From: "../patches/survey.go", To: "velociraptor/tools/survey/survey.go"},
 		{From: "../patches/compat.go", To: "velociraptor/utils/compat.go"},
 		{From: "../patches/json/validator.go", To: "velociraptor/tools/json/validator.go"},
@@ -214,6 +238,21 @@ func replace_string_in_file(filename string, old string, new string) error {
 	return ioutil.WriteFile(filename, []byte(newContents), 0644)
 }
 
+func replace_regex_in_file(filename string, old string, new string) error {
+	read, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	old_re, err := regexp.Compile(old)
+	if err != nil {
+		return err
+	}
+
+	newContents := old_re.ReplaceAllString(string(read), new)
+	return ioutil.WriteFile(filename, []byte(newContents), 0644)
+}
+
 func maybeClone(dep DependencyGithub) error {
 	base := filepath.Base(dep.Repo)
 	_, err := os.Lstat(base)
@@ -226,8 +265,28 @@ func maybeClone(dep DependencyGithub) error {
 		branch = dep.Branch
 	}
 
-	return sh.RunV("git", "clone", "--depth", "1",
+	depth := dep.Depth
+	if depth == "" {
+		depth = "1"
+	}
+
+	err = sh.RunV("git", "clone", "--depth", depth,
 		"--single-branch", "-b", branch, dep.Repo)
+	if err != nil {
+		return err
+	}
+
+	if dep.Commit == "" {
+		return nil
+	}
+
+	closer, err := Cwd(filepath.Base(dep.Repo))
+	if err != nil {
+		return err
+	}
+	defer closer()
+
+	return sh.RunV("git", "checkout", dep.Commit)
 }
 
 func copyOutput() error {
@@ -259,16 +318,11 @@ func Build() error {
 		return err
 	}
 
-	cwd, err := os.Getwd()
+	closer, err := Cwd("build")
 	if err != nil {
 		return err
 	}
-	defer os.Chdir(cwd)
-
-	err = os.Chdir("build")
-	if err != nil {
-		return err
-	}
+	defer closer()
 
 	err = installGo()
 	if err != nil {
@@ -322,10 +376,19 @@ func Build() error {
 
 			for _, match := range matches {
 				filename := filepath.Join(basepath, match)
-				fmt.Printf("Replacing %v in %v\n", m.Match, filename)
-				err = replace_string_in_file(filename, m.Match, m.Replace)
-				if err != nil {
-					return err
+
+				if m.Match != "" {
+					fmt.Printf("Replacing %v in %v\n", m.Match, filename)
+					err = replace_string_in_file(filename, m.Match, m.Replace)
+					if err != nil {
+						return err
+					}
+				} else if m.MatchRE != "" {
+					fmt.Printf("Replacing %v in %v\n", m.Match, filename)
+					err = replace_regex_in_file(filename, m.MatchRE, m.Replace)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -379,4 +442,25 @@ func Build() error {
 	}
 
 	return nil
+}
+
+func Cwd(path string) (func(), error) {
+	abs_path, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.Chdir(abs_path)
+	if err != nil {
+		return nil, err
+	}
+
+	return func() {
+		os.Chdir(cwd)
+	}, nil
 }
