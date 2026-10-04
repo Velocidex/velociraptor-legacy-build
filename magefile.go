@@ -53,7 +53,10 @@ var (
 		{Repo: "https://github.com/Velocidex/go-yara"},
 		{Repo: "https://github.com/Velocidex/oleparse"},
 		{Repo: "https://github.com/Velocidex/ordereddict"},
-		{Repo: "https://github.com/Velocidex/vfilter"},
+		{
+			Repo:   "https://github.com/Velocidex/vfilter",
+			Branch: "legacy",
+		},
 		{Repo: "https://github.com/Velocidex/go-ntfs"},
 		{Repo: "https://github.com/Velocidex/vtypes"},
 		{Repo: "https://github.com/Velocidex/disklru"},
@@ -99,8 +102,13 @@ var (
 
 		{DeleteGlob: "velociraptor/tools/survey/*.go"},
 		{DeleteGlob: "velociraptor/services/docs/*.go"},
+
 		{From: "../patches/velociraptor/docs_manager.go",
 			To: "velociraptor/services/docs/docs_manager.go"},
+
+		{DeleteGlob: "velociraptor/services/lsp/*.go"},
+		{From: "../patches/velociraptor/services/lsp/api.go",
+			To: "velociraptor/services/lsp/api.go"},
 
 		{DeleteGlob: "velociraptor/accessors/ssh/*.go"},
 		{From: "../patches/velociraptor/accessors/ssh.go",
@@ -109,9 +117,20 @@ var (
 		{From: "../patches/velociraptor/accessors/s3.go",
 			To: "velociraptor/accessors/s3/s3.go"},
 
+		{From: "../patches/velociraptor/vql/windows/wmi/parse/parse.go",
+			To: "velociraptor/vql/windows/wmi/parse/parse.go"},
+
+		{From: "../patches/velociraptor/services/repository/errors.go",
+			To: "velociraptor/services/repository/errors.go"},
+		{From: "../patches/velociraptor/services/repository/reformat.go",
+			To: "velociraptor/services/repository/reformat.go"},
+		{From: "../patches/velociraptor/services/launcher/verifier.go",
+			To: "velociraptor/services/launcher/verifier.go"},
+
 		// Remove plugins which are hard to maintain going forward
 		{DeleteGlob: "velociraptor/vql/tools/{gcs_upload.go,sftp_upload.go,s3_upload_minio.go}"},
 		{DeleteGlob: "velociraptor/vql/linux/ebpf/*.go"},
+		{DeleteGlob: "velociraptor/vql/golang/verify.go"},
 		{DeleteGlob: "velociraptor/vql/server/elastic.go"},
 		{DeleteGlob: "velociraptor/vql/tools/index/*.go"},
 		{DeleteGlob: "velociraptor/vql/parsers/journald/*.go"},
@@ -125,7 +144,7 @@ var (
 		{From: "../patches/velociraptor/ebpf.go",
 			To: "velociraptor/vql/linux/ebpf/ebpf.go"},
 
-		{DeleteGlob: "velociraptor/bin/{golden,users,grant}.go"},
+		{DeleteGlob: "velociraptor/bin/{golden,users,grant,lsp}.go"},
 		{DeleteGlob: "velociraptor/vql/common/yarax.go"},
 		{Glob: "velociraptor/vql/psutils/*.go",
 			Match:   "github.com/shirou/gopsutil/v4",
